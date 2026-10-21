@@ -1,0 +1,85 @@
+name: thumbnails
+
+# Worker publico de miniaturas.
+#
+# El codigo vive en el repo privado y se descarga con un PAT de solo lectura.
+# Este repo no imprime nombres de archivo: el worker loguea UUIDs.
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: thumbnails-worker
+  cancel-in-progress: false
+
+jobs:
+  thumbnails:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      TGM_BACKEND_URL: ${{ secrets.TGM_BACKEND_URL }}
+      TGM_WORKER_TOKEN: ${{ secrets.TGM_WORKER_TOKEN }}
+      TGM_WORKER_ID: gh-public-${{ github.run_id }}
+    steps:
+      - name: Descargar codigo privado
+        uses: actions/checkout@v4
+        with:
+          repository: mbreceda/tgm_media_server
+          token: ${{ secrets.TGM_READ_TOKEN }}
+          path: tgm
+          fetch-depth: 1
+
+      - name: Instalar ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Instalar dependencias
+        working-directory: tgm/backend
+        run: uv sync --frozen
+
+      - name: Comprobar secretos
+        shell: bash
+        run: |
+          set -eu
+          for name in TGM_BACKEND_URL TGM_WORKER_TOKEN; do
+            eval "value=\${$name:-}"
+            test -n "$value"
+          done
+
+      - name: Reaper y estado
+        working-directory: tgm/backend
+        shell: bash
+        run: |
+          set -eu
+          curl -fsS -X POST \
+            -H "x-worker-token: $TGM_WORKER_TOKEN" \
+            "$TGM_BACKEND_URL/jobs/worker/reap" >/dev/null || true
+          curl -fsS \
+            -H "x-worker-token: $TGM_WORKER_TOKEN" \
+            "$TGM_BACKEND_URL/jobs/worker/status" || true
+
+      - name: Encolar faltantes
+        working-directory: tgm/backend
+        shell: bash
+        run: |
+          set -eu
+          curl -fsS -X POST \
+            -H "x-worker-token: $TGM_WORKER_TOKEN" \
+            "$TGM_BACKEND_URL/jobs/worker/thumbnails/enqueue?limit=40"
+
+      - name: Procesar miniaturas
+        working-directory: tgm/backend
+        shell: bash
+        run: |
+          set -eu
+          for i in $(seq 1 40); do
+            echo "--- turno $i ---"
+            uv run python -m scripts.worker --once --kinds thumbnail.generate \
+              || echo "turno $i fallo"
+          done
