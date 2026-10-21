@@ -12,11 +12,11 @@ En `Settings → Secrets and variables → Actions`:
 
 | Secreto | Para qué |
 |---|---|
-| `TGM_READ_TOKEN` | PAT fine-grained con `Contents: Read` sobre `mbreceda/tgm_media_server` |
+| `TGM_DEPLOY_KEY` | Deploy key de solo lectura del repo privado |
 | `TGM_WORKER_TOKEN` | Mismo `WORKER_TOKEN` del backend |
 | `TGM_BACKEND_URL` | `https://tgm-media-server.onrender.com` |
 
-`TGM_READ_TOKEN` es de solo lectura. No darle escritura. Rotarlo si se filtra.
+`TGM_DEPLOY_KEY` es de solo lectura. No darle escritura. Rotarla si se filtra.
 
 ## Uso
 

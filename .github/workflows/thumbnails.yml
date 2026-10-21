@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: mbreceda/tgm_media_server
-          token: ${{ secrets.TGM_READ_TOKEN }}
+          ssh-key: ${{ secrets.TGM_DEPLOY_KEY }}
           path: tgm
           fetch-depth: 1
 
