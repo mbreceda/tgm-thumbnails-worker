@@ -15,6 +15,10 @@ En `Settings → Secrets and variables → Actions`:
 | `TGM_DEPLOY_KEY` | Deploy key de solo lectura del repo privado |
 | `TGM_WORKER_TOKEN` | Mismo `WORKER_TOKEN` del backend |
 | `TGM_BACKEND_URL` | `https://tgm-media-server.onrender.com` |
+| `R2_ENDPOINT` | Endpoint S3 del bucket |
+| `R2_BUCKET` | Bucket de miniaturas |
+| `R2_ACCESS_KEY_ID` | Credencial R2 |
+| `R2_SECRET_ACCESS_KEY` | Credencial R2 |
 
 `TGM_DEPLOY_KEY` es de solo lectura. No darle escritura. Rotarla si se filtra.
 

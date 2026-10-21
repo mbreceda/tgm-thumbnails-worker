@@ -25,6 +25,10 @@ jobs:
       TGM_BACKEND_URL: ${{ secrets.TGM_BACKEND_URL }}
       TGM_WORKER_TOKEN: ${{ secrets.TGM_WORKER_TOKEN }}
       TGM_WORKER_ID: gh-public-${{ github.run_id }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
     steps:
       - name: Descargar codigo privado
         uses: actions/checkout@v4
@@ -47,7 +51,7 @@ jobs:
         shell: bash
         run: |
           set -eu
-          for name in TGM_BACKEND_URL TGM_WORKER_TOKEN; do
+          for name in TGM_BACKEND_URL TGM_WORKER_TOKEN R2_ENDPOINT R2_BUCKET R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY; do
             eval "value=\${$name:-}"
             test -n "$value"
           done
